@@ -40,7 +40,9 @@ void populaMem(MemPrincipal memoria[TMEM]){
 	}
 }
 
+void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 
+}
 
 
 int main(){
@@ -49,6 +51,17 @@ int main(){
 
 	iniciaCache(cache);
 	populaMem(memoria);
+
+
+
+
+
+
+
+
+
+
+
 
 	return 0;
 }
