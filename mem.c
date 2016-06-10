@@ -28,9 +28,9 @@ typedef struct MemPrincipal{
 	int info;
 }MemPrincipal;
 
-int acessos = 0, acertos = 0, faltas = 0;
-int leituras = 0, escritas = 0;
-int aLeituras = 0, fLeituras = 0;
+int acesso = 0, acerto = 0, falta = 0;
+int leitura = 0, escrita = 0;
+int aLeitura = 0, fLeitura = 0;
 int aEscrita = 0,fEscrita = 0;
 
 void iniciaCache(MemCache cache[TCACHE]){
@@ -140,7 +140,7 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	cache[p].bloco = b;
 	cache[p].deslocamento = d;
 	binDeslocamento(cache[p].deslocamentoBin, d);
-	binBloco(cache[0].enderecoBin, b);
+	binBloco(cache[0].blocoBin, b);
 
 	scanf("%d", &d);
 
