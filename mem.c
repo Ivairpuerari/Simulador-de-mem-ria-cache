@@ -34,9 +34,16 @@ int aLeitura = 0, fLeitura = 0;
 int aEscrita = 0,fEscrita = 0;
 
 void iniciaCache(MemCache cache[TCACHE]){
-	int i;
+	int i, j;
 	for(i = 0; i < TCACHE; i ++){
 		cache[i].valBit = 0;
+		cache[i].info = 0;	
+		for(j = 0; j < TBLOCO; j++){
+			cache[i].blocoBin[j] = 0;
+		}
+		for(j = 0; j < TDESLOCAMENTO; j++){
+			cache[i].deslocamentoBin[j] = 0;
+		}
 	}
 }
 
@@ -95,31 +102,50 @@ void binDeslocamento( int d[TBLOCO], int x ){
 	for(i = 0; i < TDESLOCAMENTO; i ++){
 		d[i] = r[x--];
 	}	
+}
 
+void mostraCache(MemCache cache[TCACHE]){
+	int i, j;
+
+	printf("*******************************************************************************************\n");
+	printf("| bloco%10s| deslocamento%10s| bit de validade%10s| informacao%10s|\n", "  ","  ","  ","  ");
+	printf("*******************************************************************************************\n");
+	
+	for( i = 0; i < TCACHE; i++){
+		printf("| ");
+		for(j = 0; j < TBLOCO; j++){
+			printf("%d", cache[i].blocoBin[j]);
+		}
+		printf("%10s| ", "  ");
+		
+		for(j = 0; j < TDESLOCAMENTO; j++){
+			printf("%d", cache[i].deslocamentoBin[j]);
+		}
+		printf("%19s| ", "  ");
+		printf("%d", cache[i].valBit);
+		printf("%24s| ", "  ");
+		printf("%d \n", cache[i].info);	
+		printf("-------------------------------------------------------------------------------------------\n");
+	}
 }
 
 void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	leitura++;
 	int d = 0, b = 0, i, p = 0;
+	
+	if(endereco > 256 || endereco < 0){
+		printf("Endereco informado nao existe!!\n Digite 0 para voltar ao menu ");
+		scanf("%d", &d);
+		return;
+	}
+
 
 	d = endereco % 8;
 	b = endereco / 8;
 
-/*
-	printf("Bloco: %d\n", b);
-	binBloco(cache[0].enderecoBin, b);
-
-	for(i = 0; i < TBLOCO; i ++){
-		printf("%d", cache[0].enderecoBin[i]);
-	}
-	printf("\n");
-	printf("Deslocamento: %d\n", d);
-	binDeslocamento(cache[0].deslocamentoBin, d);
-	
-	for(i = 0; i < TDESLOCAMENTO; i ++){
-		printf("%d", cache[0].deslocamentoBin[i]);
-	}
-*/
+	printf("endereco: %d \n", endereco);
+	printf("Bloco: %d \n", b);
+	printf("Deslocamento:%d \n", d);
 
 	for(i = 0; i < TCACHE; i ++){
 		if(cache[i].valBit !=0){
@@ -128,6 +154,9 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 				aLeitura++;
 				printf("\n");	
 				printf("%d\n\n", cache[i].info);
+				mostraCache(cache);
+				printf("Digite 0 para voltar ao menu   ");
+				scanf("%d", &d);
 				return;
 			}			
 		}
@@ -140,8 +169,10 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	cache[p].bloco = b;
 	cache[p].deslocamento = d;
 	binDeslocamento(cache[p].deslocamentoBin, d);
-	binBloco(cache[0].blocoBin, b);
-
+	binBloco(cache[p].blocoBin, b);
+	
+	mostraCache(cache);
+	printf("Digite 0 para voltar ao menu   ");
 	scanf("%d", &d);
 
 	return;
@@ -160,7 +191,7 @@ int main(){
 	iniciaCache(cache);
 	populaMem(memoria);
 
-	int menu = 100, sub = 100, endereco = 0, info;
+	int menu = 100, sub = 100, endereco = 0, info, l;
 	
 	while(menu){
 		system("clear");
@@ -171,10 +202,11 @@ int main(){
 		printf("| 1 - Ler da Memoria							|\n");
 		printf("| 2 - Escerver na Memoria						|\n");
 		printf("| 3 - Estatisticas							|\n");
+		printf("| 0 - Finalizar Programa						|\n");
 		printf("=========================================================================\n");
 		printf("Digite a Opcao desejada: ");
 		scanf("%d", &menu);
-
+		system("clear");
 		switch(menu){
 			case 1: 
 				printf("OBS: O endereco da memoria que sera lido\n Endereco deve ser em decimal!\n Endereco: ");
@@ -191,24 +223,88 @@ int main(){
 				EscreverMem(info, endereco, memoria, cache);
 				break;
 			case 3: 
-				system("clear");
-				printf("=========================================================================\n");
-				printf("|	SIMULADOR DE MEMORIA - ESTATISTICAS				|\n");
-				printf("|-----------------------------------------------------------------------|\n");
-				printf("|	MENU								|\n");
-				printf("| 0 - Retornar ao menu anterior						|\n");
-				printf("| 1 - Numero de Acessos							|\n");
-				printf("| 2 - Numero de Acertos							|\n");
-				printf("| 3 - Numero de Faltas							|\n");
-				printf("| 4 - Numero de Leituras						|\n");
-				printf("| 5 - Numero de Escritas						|\n");
-				printf("| 6 - Numero de Acertos na Leitura					|\n");
-				printf("| 7 - Numero de Acertos na Escrita					|\n");
-				printf("| 8 - Numero de Faltas na Leitura					|\n");
-				printf("| 9 - Numero de Faltas na Escrita					|\n");
-				printf("=========================================================================\n");
-				printf("Digite a Opcao desejada: ");
-				scanf("%d", &sub);
+				while(sub){
+					system("clear");
+					printf("=========================================================================\n");
+					printf("|	SIMULADOR DE MEMORIA - ESTATISTICAS				|\n");
+					printf("|-----------------------------------------------------------------------|\n");
+					printf("|	MENU								|\n");
+					printf("| 0 - Retornar ao menu anterior						|\n");
+					printf("| 1 - Numero de Acessos							|\n");
+					printf("| 2 - Numero de Acertos							|\n");
+					printf("| 3 - Numero de Faltas							|\n");
+					printf("| 4 - Numero de Leituras						|\n");
+					printf("| 5 - Numero de Escritas						|\n");
+					printf("| 6 - Numero de Acertos na Leitura					|\n");
+					printf("| 7 - Numero de Acertos na Escrita					|\n");
+					printf("| 8 - Numero de Faltas na Leitura					|\n");
+					printf("| 9 - Numero de Faltas na Escrita					|\n");
+					printf("| 10 - Todas as Estatisticas						|\n");
+					printf("=========================================================================\n");
+					printf("Digite a Opcao desejada: ");
+					scanf("%d", &sub);
+					system("clear");	
+					switch(sub){
+						case 1:
+							printf("Numero toltal de acessos (leitura e escrita): %d\nDigite 0 para voltar para o menu\n", acesso);
+							scanf("%d", &l);
+							break;
+
+						case 2:
+							printf("Numero toltal de acertos (leitura e escrita): %d\nDigite 0 para voltar para o menu\n", acerto);
+							scanf("%d", &l);
+							break;
+
+						case 3:
+							printf("Numero toltal de faltas (leitura e escrita): %d\nDigite 0 para voltar para o menu\n", falta);
+							scanf("%d", &l);
+							break;
+
+						case 4:
+							printf("Numero toltal de Leituras: %d\nDigite 0 para voltar para o menu\n", leitura);
+							scanf("%d", &l);
+							break;
+
+						case 5:
+							printf("Numero toltal de escritas: %d\nDigite 0 para voltar para o menu\n", escrita);
+							scanf("%d", &l);
+							break;
+
+						case 6:
+							printf("Numero toltal de acerto de leitura: %d\nDigite 0 para voltar para o menu\n", aLeitura);
+							scanf("%d", &l);
+							break;
+
+						case 7:
+							printf("Numero toltal de acertos de escrita: %d\nDigite 0 para voltar para o menu\n", aEscrita);
+							scanf("%d", &l);
+							break;
+
+						case 8:
+							printf("Numero toltal de faltas de leitura: %d\nDigite 0 para voltar para o menu\n", fLeitura);
+							scanf("%d", &l);
+							break;
+
+						case 9:
+							printf("Numero toltal de faltas de escrita: %d\nDigite 0 para voltar para o menu\n", fEscrita);
+							scanf("%d", &l);
+							break;
+
+						case 10:
+							printf("Total de Acessos: %d\n", acesso);
+							printf("Total de Acertos: %d\n", acerto);
+							printf("Total de Faltas: %d\n", falta);
+							printf("Total de Leituras: %d\n", leitura);
+							printf("Total de Escritas: %d\n", escrita);
+							printf("Total de Acertos de Leitura: %d\n", aLeitura);
+							printf("Total de Acertos de Escrita: %d\n", aEscrita);
+							printf("Total de Faltas de Leitura: %d\n", fLeitura);
+							printf("Total de Faltas de Escrita: %d\n", fEscrita);
+							scanf("%d", &l);
+							break;
+					
+					}
+				}
 				break;
 		}
 		
