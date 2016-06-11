@@ -151,6 +151,7 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 				printf("\n");	
 				printf("%d\n\n", cache[i].info);
 				mostraCache(cache);
+				printf("Informacao lida com SUCESSO\n");
 				printf("Digite 0 para voltar ao menu   ");
 				scanf("%d", &z);
 				return;
@@ -178,7 +179,52 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 }
 
 void EscreverMem(int info, int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
+	escrita++;
+	int d = 0, b = 0, i, p = 0, z;
 
+	if(endereco > 256 || endereco < 0){
+		printf("Endereco informado nao existe!!\n Digite 0 para voltar ao menu ");
+		scanf("%d", &z);
+		return;
+	}
+	
+	d = endereco % 8;
+	b = endereco / 8;
+	
+	for(i = 0; i < TCACHE; i ++){
+		if(cache[i].valBit !=0){
+			if(cache[i].bloco == b && cache[i].deslocamento == d){
+				acerto++;
+				aEscrita++;
+				cache[i].info = info;
+				memoria[endereco].info = info;
+				printf("\n");	
+				printf("%d\n\n", cache[i].info);
+				mostraCache(cache);
+				printf("Informacao gravada com SUCESSO\n");
+				printf("Digite 0 para voltar ao menu   ");
+				scanf("%d", &z);
+				return;
+			}			
+		}
+	}
+	falta++;
+	fEscrita++;
+	p = rand() % 16;
+	cache[p].valBit = 1;
+	cache[p].info = info;
+	memoria[endereco].info = info;
+	cache[p].bloco = b;
+	cache[p].deslocamento = d;
+	binDeslocamento(cache[p].deslocamentoBin, d);
+	binBloco(cache[p].blocoBin, b);
+	printf("\n");
+	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info);
+	printf("Bloco: %d \n", b);
+	printf("Deslocamento:%d \n", d);
+	mostraCache(cache);
+	printf("Digite 0 para voltar ao menu   ");
+	scanf("%d", &z);
 }
 
 int main(){
