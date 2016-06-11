@@ -131,7 +131,7 @@ void mostraCache(MemCache cache[TCACHE]){
 
 void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	leitura++;
-	int d = 0, b = 0, i, p = 0;
+	int d = 0, b = 0, i, p = 0, z;
 	
 	if(endereco > 256 || endereco < 0){
 		printf("Endereco informado nao existe!!\n Digite 0 para voltar ao menu ");
@@ -143,10 +143,6 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	d = endereco % 8;
 	b = endereco / 8;
 
-	printf("endereco: %d \n", endereco);
-	printf("Bloco: %d \n", b);
-	printf("Deslocamento:%d \n", d);
-
 	for(i = 0; i < TCACHE; i ++){
 		if(cache[i].valBit !=0){
 			if(cache[i].bloco == b && cache[i].deslocamento == d){
@@ -156,7 +152,7 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 				printf("%d\n\n", cache[i].info);
 				mostraCache(cache);
 				printf("Digite 0 para voltar ao menu   ");
-				scanf("%d", &d);
+				scanf("%d", &z);
 				return;
 			}			
 		}
@@ -170,7 +166,10 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	cache[p].deslocamento = d;
 	binDeslocamento(cache[p].deslocamentoBin, d);
 	binBloco(cache[p].blocoBin, b);
-	
+	printf("\n");
+	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info);
+	printf("Bloco: %d \n", b);
+	printf("Deslocamento:%d \n", d);
 	mostraCache(cache);
 	printf("Digite 0 para voltar ao menu   ");
 	scanf("%d", &d);
@@ -305,6 +304,7 @@ int main(){
 					
 					}
 				}
+				sub = 100;
 				break;
 		}
 		
