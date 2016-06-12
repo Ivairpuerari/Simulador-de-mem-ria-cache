@@ -9,7 +9,7 @@
 #define TBLOCO 5
 #define TDESLOCAMENTO 3
 
-/* Grupos 5: IVAIR PUERARI, JEFERSON AUGUSTO SCHEIN e GABRIEL FERNANDO CASAGRANDE
+/* Grupos 5: IVAIR PUERARI, JEFERSON AUGUSTO SCHEIN
 Politica de Mapeamento: Totalmente associativo
 Politica de Troca: Aleatório
 Politica de escrita:  Write - Through */ 
@@ -133,7 +133,7 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	leitura++;
 	int d = 0, b = 0, i, p = 0, z;
 	
-	if(endereco > 256 || endereco < 0){
+	if(endereco >= 256 || endereco < 0){
 		printf("Endereco informado nao existe!!\n Digite 0 para voltar ao menu ");
 		scanf("%d", &d);
 		return;
@@ -182,7 +182,7 @@ void EscreverMem(int info, int endereco, MemPrincipal memoria[TMEM], MemCache ca
 	escrita++;
 	int d = 0, b = 0, i, p = 0, z;
 
-	if(endereco > 256 || endereco < 0){
+	if(endereco >= 256 || endereco < 0){
 		printf("Endereco informado nao existe!!\n Digite 0 para voltar ao menu ");
 		scanf("%d", &z);
 		return;
