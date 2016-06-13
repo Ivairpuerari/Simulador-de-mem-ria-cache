@@ -7,7 +7,7 @@
 #define TCACHE 16
 #define TMEM 256
 #define TBLOCO 5
-#define TDESLOCAMENTO 3
+#define TCELULA 8
 
 /* Grupos 5: IVAIR PUERARI, JEFERSON AUGUSTO SCHEIN
 Politica de Mapeamento: Totalmente associativo
@@ -16,11 +16,9 @@ Politica de escrita:  Write - Through */
 
 typedef struct MemCache{
 	int valBit;  		// se 0 sem informacao, 1 informacao presente
-	int deslocamento;	// deslocamento dentro do bloco da memoria
-	int deslocamentoBin[3];	// deslocamento em binario
 	int bloco; 		// endereco do comeco do bloco da memorio
 	int blocoBin[5];	// endereco em binario 	
-	int info;
+	int info[8];
 	
 }MemCache;
  
@@ -37,12 +35,12 @@ void iniciaCache(MemCache cache[TCACHE]){
 	int i, j;
 	for(i = 0; i < TCACHE; i ++){
 		cache[i].valBit = 0;
-		cache[i].info = 0;	
+			
 		for(j = 0; j < TBLOCO; j++){
 			cache[i].blocoBin[j] = 0;
 		}
-		for(j = 0; j < TDESLOCAMENTO; j++){
-			cache[i].deslocamentoBin[j] = 0;
+		for(j = 0; j < TCELULA; j++){
+			cache[i].info[j] = 0;
 		}
 	}
 }
@@ -80,36 +78,15 @@ void binBloco( int d[TBLOCO], int x ){
 	}
 }
 
-void binDeslocamento( int d[TBLOCO], int x ){
-	int i;
-	int r[TDESLOCAMENTO];
-
-	for(i = 0; i < TDESLOCAMENTO; i ++){
-		r[i] = 0;
-	}	
-
-	for(i = 0; x != 0 && i < TDESLOCAMENTO; i++){
-		if(x == 0){				
-			r[i] = 1;
-		}else if((x % 2) == 0){
-			r[i] = 0;		
-		}else if((x % 2) == 1){
-			r[i] = 1;		
-		}
-		x = x / 2;
-	}
-	x = 2;
-	for(i = 0; i < TDESLOCAMENTO; i ++){
-		d[i] = r[x--];
-	}	
-}
 
 void mostraCache(MemCache cache[TCACHE]){
 	int i, j;
 
-	printf("*******************************************************************************************\n");
-	printf("| bloco%10s| deslocamento%10s| bit de validade%10s| informacao%10s|\n", "  ","  ","  ","  ");
-	printf("*******************************************************************************************\n");
+	printf("******************************************************************************");
+	printf("************************************************************************\n");
+	printf("| bloco%10s| bit de validade%10s| %10c | %10c | %10c | %10c | %10c | %10c | %10c | %10c |\n", "  ","  ",'0','1','2','3','4','5','6','7');
+	printf("**********************************************************************************");
+	printf("********************************************************************\n");
 	
 	for( i = 0; i < TCACHE; i++){
 		printf("| ");
@@ -117,15 +94,14 @@ void mostraCache(MemCache cache[TCACHE]){
 			printf("%d", cache[i].blocoBin[j]);
 		}
 		printf("%10s| ", "  ");
-		
-		for(j = 0; j < TDESLOCAMENTO; j++){
-			printf("%d", cache[i].deslocamentoBin[j]);
-		}
-		printf("%19s| ", "  ");
 		printf("%d", cache[i].valBit);
-		printf("%24s| ", "  ");
-		printf("%d \n", cache[i].info);	
-		printf("-------------------------------------------------------------------------------------------\n");
+		printf("%24s|", "  ");
+		for(j = 0; j < TCELULA; j++){
+			printf(" %10d |", cache[i].info[j]);
+		}
+		printf("\n");
+		printf("------------------------------------------------------------------------------");
+		printf("--------------------------------------------------------------------------\n");
 	}
 }
 
@@ -145,11 +121,11 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 
 	for(i = 0; i < TCACHE; i ++){
 		if(cache[i].valBit !=0){
-			if(cache[i].bloco == b && cache[i].deslocamento == d){
+			if(cache[i].bloco == b){
 				acerto++;
 				aLeitura++;
 				printf("\n");	
-				printf("%d\n\n", cache[i].info);
+				printf("%d\n\n", cache[i].info[d]);
 				mostraCache(cache);
 				printf("Informacao lida com SUCESSO\n");
 				printf("Digite 0 para voltar ao menu   ");
@@ -162,13 +138,13 @@ void LerMem(int endereco, MemPrincipal memoria[TMEM], MemCache cache[TCACHE]){
 	fLeitura++;
 	p = rand() % 16;
 	cache[p].valBit = 1;
-	cache[p].info = memoria[endereco].info;
+	for(i = 0; i < TCELULA; i++){
+		cache[p].info[i] = memoria[(b * 8) + i].info;
+	}
 	cache[p].bloco = b;
-	cache[p].deslocamento = d;
-	binDeslocamento(cache[p].deslocamentoBin, d);
 	binBloco(cache[p].blocoBin, b);
 	printf("\n");
-	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info);
+	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info[d]);
 	printf("Bloco: %d \n", b);
 	printf("Deslocamento:%d \n", d);
 	mostraCache(cache);
@@ -193,13 +169,13 @@ void EscreverMem(int info, int endereco, MemPrincipal memoria[TMEM], MemCache ca
 	
 	for(i = 0; i < TCACHE; i ++){
 		if(cache[i].valBit !=0){
-			if(cache[i].bloco == b && cache[i].deslocamento == d){
+			if(cache[i].bloco == b){
 				acerto++;
 				aEscrita++;
-				cache[i].info = info;
+				cache[i].info[d] = info;
 				memoria[endereco].info = info;
 				printf("\n");	
-				printf("%d\n\n", cache[i].info);
+				printf("%d\n\n", cache[i].info[d]);
 				mostraCache(cache);
 				printf("Informacao gravada com SUCESSO\n");
 				printf("Digite 0 para voltar ao menu   ");
@@ -212,14 +188,14 @@ void EscreverMem(int info, int endereco, MemPrincipal memoria[TMEM], MemCache ca
 	fEscrita++;
 	p = rand() % 16;
 	cache[p].valBit = 1;
-	cache[p].info = info;
 	memoria[endereco].info = info;
 	cache[p].bloco = b;
-	cache[p].deslocamento = d;
-	binDeslocamento(cache[p].deslocamentoBin, d);
+	for(i = 0; i < TCELULA; i ++){
+		cache[p].info[i] = memoria[(b * 8) + i].info;
+	}
 	binBloco(cache[p].blocoBin, b);
 	printf("\n");
-	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info);
+	printf("Informacao do endereco %d: %d\n\n", endereco, cache[p].info[d]);
 	printf("Bloco: %d \n", b);
 	printf("Deslocamento:%d \n", d);
 	mostraCache(cache);
@@ -351,6 +327,12 @@ int main(){
 					}
 				}
 				sub = 100;
+				break;
+			case 4:
+				for(l = 0; l < TMEM;l++){
+					printf("%d: %d\n", l, memoria[l].info);
+				}
+				scanf("%d", &l);
 				break;
 		}
 		
